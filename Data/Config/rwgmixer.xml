@@ -550,6 +550,579 @@
 -->
 
 	<terrain_generators>
+		<terrain_generator name="vanilla" use_old_final="false">
+			<module name="constant" type="Constant"/><!--0-->
+
+<!--**********************************************************
+						Smooth Land
+											1 seed_additive
+	**********************************************************-->
+			<module name="landSmooth" type="Billow" seed_additive="0">
+				<property name="frequency" value="0.27"/>
+				<property name="octaveCount" value="3"/>
+			</module>
+			<module name="landSmoothOut" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landSmooth"/>
+				<property name="scale" value="0.1"/>
+				<property name="bias" value="0.3"/>
+			</module>
+
+<!--**********************************************************
+						Rough Land
+											1 seed_additive
+	**********************************************************-->
+			<module name="landRoughBaseBase" type="FastNoise" seed_additive="1">
+				<property name="frequency" value="34"/>
+				<property name="octaveCount" value="1"/>
+			</module>
+			<module name="landRoughBase" type="ScaleInput">
+				<property name="sourceModule" value="landRoughBaseBase"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="landRoughDither" type="FastTurbulence">
+				<property name="sourceModule" value="landRoughBase"/>
+				<property name="frequency" value="0.5"/>
+				<property name="power" value="0.005"/>
+				<property name="roughness" value="1"/>
+			</module>
+			<module name="landRoughClamped" type="ClampOutput">
+				<property name="sourceModule" value="landRoughDither"/>
+				<property name="bounds" value="-0.7,0.7"/>
+			</module>
+			<module name="landRoughOut" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landRoughClamped"/>
+				<property name="scale" value="0.08"/>
+			</module>
+
+<!--**********************************************************
+						Wavy Land
+											4 seed_additive
+	**********************************************************-->
+			<module name="landWavyBaseBase" type="Billow" seed_additive="2">
+				<property name="frequency" value="6"/>
+				<property name="octaveCount" value="2"/>
+			</module>
+			<module name="landWavyBase" type="ScaleInput">
+				<property name="sourceModule" value="landWavyBaseBase"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="landWavyBaseDither" type="FastTurbulence" seed_additive="3">
+				<property name="sourceModule" value="landWavyBase"/>
+				<property name="frequency" value="0.02"/>
+				<property name="power" value="0.07"/>
+				<property name="roughness" value="2"/>
+			</module>
+			<module name="landWavyA" type="SmallerOutput">
+				<property name="sourceModule1" value="landWavyBase"/>
+				<property name="sourceModule2" value="landWavyBaseDither"/>
+			</module>
+			<module name="landWavyBInv" type="LargerOutput">
+				<property name="sourceModule1" value="landWavyBase"/>
+				<property name="sourceModule2" value="landWavyBaseDither"/>
+			</module>
+			<module name="landWavyB" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landWavyBInv"/>
+				<property name="scale" value="-1"/>
+				<property name="bias" value="0"/>
+			</module>
+			<module name="landWavy" type="LargerOutput">
+				<property name="sourceModule1" value="landWavyA"/>
+				<property name="sourceModule2" value="landWavyB"/>
+			</module>
+			<module name="landWavyDither" type="FastTurbulence" seed_additive="4">
+				<property name="sourceModule" value="landWavy"/>
+				<property name="frequency" value="10"/>
+				<property name="power" value="0.02"/>
+				<property name="roughness" value="3"/>
+			</module>
+			<module name="landWavyScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landWavyDither"/>
+				<property name="scale" value="0.07"/>
+				<property name="bias" value="0.03"/>
+			</module>
+			<module name="landWavyCtrl" type="FastNoise" seed_additive="5">
+				<property name="frequency" value="2"/>
+			</module>
+			<module name="landWavyCtrlScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landWavyCtrl"/>
+				<property name="scale" value="1"/>
+				<property name="bias" value="0.5"/>
+			</module>
+			<module name="landWavyCtrlClamped" type="ClampOutput">
+				<property name="sourceModule" value="landWavyCtrlScaled"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<module name="landWavyShiftScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="landWavyCtrl"/>
+				<property name="scale" value="0.15"/>
+				<property name="bias" value="0"/>
+			</module>
+			<module name="landWavyShiftClamped" type="ClampOutput">
+				<property name="sourceModule" value="landWavyShiftScaled"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<module name="landWavyMulti" type="Multiply">
+				<property name="sourceModule1" value="landWavyScaled"/>
+				<property name="sourceModule2" value="landWavyCtrlClamped"/>
+			</module>
+			<module name="landWavyOut" type="Add">
+				<property name="sourceModule1" value="landWavyMulti"/>
+				<property name="sourceModule2" value="landWavyShiftClamped"/>
+			</module>
+
+
+
+<!--**********************************************************
+						Mesa / Butte
+											3 seed_additive
+	**********************************************************-->
+			<!--<module name="constant" type="Constant"/>-->
+			<module name="mesaBaseBase" type="FastBillow" seed_additive="6">
+				<property name="frequency" value="5"/>
+				<property name="octaveCount" value="2"/>
+			</module>
+			<module name="mesaBase" type="ScaleBiasOutput">
+				<property name="sourceModule" value="mesaBaseBase"/>
+				<property name="scale" value="0.04"/>
+				<property name="bias" value="0.04"/>
+			</module>
+			<module name="mesaCtrlBaseBase" type="FastNoise" seed_additive="7">
+				<property name="frequency" value="1.3"/>
+				<property name="octaveCount" value="10"/>
+			</module>
+			<!--<module name="mesaCtrlBase" type="ScaleInput">
+				<property name="sourceModule" value="mesaCtrlBaseBase"/>
+				<property name="y" value="0"/>
+			</module>-->
+			<!--<module name="mesaCtrl" type="FastTurbulence" seed_additive="8">
+				<property name="sourceModule" value="mesaCtrlBase"/>
+				<property name="frequency" value="2"/>
+				<property name="power" value="0.0"/>
+				<property name="roughness" value="1"/>
+			</module>-->
+			<module name="mesaBase1" type="BiasOutput">
+				<property name="sourceModule" value="mesaBase"/>
+				<property name="bias" value="0.15"/>
+			</module>
+			<module name="mesaBase2" type="BiasOutput">
+				<property name="sourceModule" value="mesaBase"/>
+				<property name="bias" value="0.5"/>
+			</module>
+			<module name="mesaBase3" type="BiasOutput">
+				<property name="sourceModule" value="mesaBase"/>
+				<property name="bias" value="0.57"/>
+			</module>
+			<module name="mesaBase4" type="BiasOutput">
+				<property name="sourceModule" value="mesaBase"/>
+				<property name="bias" value="0.65"/>
+			</module>
+			<module name="mesaStage1" type="Select">
+				<property name="sourceModule1" value="mesaBase1"/>
+				<property name="sourceModule2" value="constant"/>
+				<property name="controlModule" value="mesaCtrl"/>
+				<property name="bounds" value="-0.75,0.75"/>
+				<property name="edgeFalloff" value="0.2"/>
+			</module>
+			<module name="mesaStage2" type="Select">
+				<property name="sourceModule1" value="mesaBase2"/>
+				<property name="sourceModule2" value="mesaStage1"/>
+				<property name="controlModule" value="mesaCtrl"/>
+				<property name="bounds" value="-1,1"/>
+				<property name="edgeFalloff" value="0.05"/>
+			</module>
+			<module name="mesaStage3" type="Select">
+				<property name="sourceModule1" value="mesaBase3"/>
+				<property name="sourceModule2" value="mesaStage2"/>
+				<property name="controlModule" value="mesaCtrl"/>
+				<property name="bounds" value="-1.08,1.08"/>
+				<property name="edgeFalloff" value="0.02"/>
+			</module>
+			<module name="mesaOut" type="Select">
+				<property name="sourceModule1" value="mesaBase4"/>
+				<property name="sourceModule2" value="mesaStage3"/>
+				<property name="controlModule" value="mesaCtrl"/>
+				<property name="bounds" value="-1.15,1.15"/>
+				<property name="edgeFalloff" value="0.02"/>
+			</module>
+
+
+<!--**********************************************************
+						Crater Alpha
+											0 seed_additive
+		Generate 200x200 sized crater in whole world.
+	**********************************************************-->
+			<module name="craterBaseBase" type="Cylinders">
+				<property name="frequency" value="0.00248"/>
+			</module>
+			<!--Go up is 1/2 of 512 = 256
+				100000=256/0.00248-->
+			<module name="craterBaseScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="craterBaseBase"/>
+				<property name="scale" value="-500"/>
+				<property name="bias" value="500"/>
+			</module>
+			<!--rad=100000 elev=2-->
+			<module name="craterBaseClamped" type="ClampOutput">
+				<property name="sourceModule" value="craterBaseScaled"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<!--rad=100 elev=0~1-->
+			<module name="craterBaseIntenseCtrl" type="ScaleBiasOutput">
+				<property name="sourceModule" value="craterBaseClamped"/>
+				<property name="scale" value="0.6"/>
+				<property name="bias" value="0.4"/>
+			</module>
+			<module name="craterBaseIntense" type="Multiply">
+				<property name="sourceModule1" value="craterBaseClamped"/>
+				<property name="sourceModule2" value="craterBaseIntenseCtrl"/>
+			</module>
+			<module name="craterBase" type="BiasOutput">
+				<property name="sourceModule" value="craterBaseIntense"/>
+				<property name="bias" value="-1"/>
+			</module>
+			<!--Shift constant area to 0-->
+			<module name="craterR100" type="ScaleOutput">
+				<property name="sourceModule" value="craterBase"/>
+				<property name="scale" value="0.6"/>
+			</module>
+			<!--Translating table
+				126 : 0.25   64 : 0.125
+				32 : 0.0625  16 : 0.03125
+				64+32 : 0.1875  64+16 : 0.15625
+				32+16 : 0.09375
+				
+				TmpA : parts for TmpB
+				TmpB : 128x128 area
+				TmpC : parts for TmpD
+				TmpD : 512x512 area-->
+			<module name="craterTmpB00" type="TranslateInput"><!--200x200 hole-->
+				<property name="sourceModule" value="craterR100"/>
+				<property name="x" value="0.25"/>
+				<property name="z" value="0.25"/>
+				<property name="y" value="0"/>
+			</module>
+
+			<module name="craterTmpC00" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpB00"/>
+				<property name="x" value="0.35"/>
+				<property name="z" value="1.1"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpC01" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpB00"/>
+				<property name="x" value="1.1"/>
+				<property name="z" value="0.35"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpC02" type="Add">
+				<property name="sourceModule1" value="craterTmpB00"/>
+				<property name="sourceModule2" value="craterTmpC00"/>
+			</module>
+
+			<module name="craterTmpD00" type="Add">
+				<property name="sourceModule1" value="craterTmpC01"/>
+				<property name="sourceModule2" value="craterTmpC02"/>
+			</module>
+			<module name="craterTmpE000" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpD00"/>
+				<property name="x" value="2"/>
+				<property name="z" value="0"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE001" type="Add">
+				<property name="sourceModule1" value="craterTmpD00"/>
+				<property name="sourceModule2" value="craterTmpE000"/>
+			</module>
+			<module name="craterTmpE002" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE001"/>
+				<property name="x" value="0"/>
+				<property name="z" value="2"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE003" type="Add">
+				<property name="sourceModule1" value="craterTmpE001"/>
+				<property name="sourceModule2" value="craterTmpE002"/>
+			</module>
+			<module name="craterTmpE004" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE003"/>
+				<property name="x" value="4"/>
+				<property name="z" value="0"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE005" type="Add">
+				<property name="sourceModule1" value="craterTmpE003"/>
+				<property name="sourceModule2" value="craterTmpE004"/>
+			</module>
+			<module name="craterTmpE006" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE005"/>
+				<property name="x" value="0"/>
+				<property name="z" value="4"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE007" type="Add">
+				<property name="sourceModule1" value="craterTmpE005"/>
+				<property name="sourceModule2" value="craterTmpE006"/>
+			</module>
+			<module name="craterTmpE008" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE007"/>
+				<property name="x" value="8"/>
+				<property name="z" value="0"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE009" type="Add">
+				<property name="sourceModule1" value="craterTmpE007"/>
+				<property name="sourceModule2" value="craterTmpE008"/>
+			</module>
+			<module name="craterTmpE010" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE009"/>
+				<property name="x" value="0"/>
+				<property name="z" value="8"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE011" type="Add">
+				<property name="sourceModule1" value="craterTmpE009"/>
+				<property name="sourceModule2" value="craterTmpE010"/>
+			</module>
+			<module name="craterTmpE012" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE011"/>
+				<property name="x" value="-16"/>
+				<property name="z" value="0"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterTmpE013" type="Add">
+				<property name="sourceModule1" value="craterTmpE011"/>
+				<property name="sourceModule2" value="craterTmpE012"/>
+			</module>
+			<module name="craterTmpE014" type="TranslateInput">
+				<property name="sourceModule" value="craterTmpE013"/>
+				<property name="x" value="0"/>
+				<property name="z" value="-16"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="craterOut" type="Add">
+				<property name="sourceModule1" value="craterTmpE013"/>
+				<property name="sourceModule2" value="craterTmpE014"/>
+			</module>
+
+
+<!--**********************************************************
+						Stinging Mountain
+											2 seed_additive
+		This sub-generator make mountains with sharp ridges.
+		And each of them are at distant with the others.
+		Elevation is regularized into 0,1 bound.
+	**********************************************************-->
+			<module name="sting" type="FastRidgedMultifractal" seed_additive="10">
+				<property name="frequency" value="0.5"/>
+			</module>
+			<module name="stingScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="sting"/>
+				<property name="scale" value="0.5"/>
+				<property name="bias" value="0.37"/>
+			</module>
+			<module name="stingClamped" type="ClampOutput">
+				<property name="sourceModule" value="stingScaled"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<module name="stingRidge" type="FastRidgedMultifractal" seed_additive="11">
+				<property name="frequency" value="1"/>
+			</module>
+			<module name="stingRidgeScaled" type="ScaleBiasOutput">
+				<property name="sourceModule" value="stingRidge"/>
+				<property name="scale" value="0.5"/>
+				<property name="bias" value="0.37"/>
+			</module>
+			<module name="stingRidgeClamped" type="ClampOutput">
+				<property name="sourceModule" value="stingRidgeScaled"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<module name="stingMountain" type="Multiply">
+				<property name="sourceModule1" value="stingClamped"/>
+				<property name="sourceModule2" value="stingRidgeClamped"/>
+			</module>
+			<module name="stingIntense" type="ScaleBiasOutput">
+				<property name="sourceModule" value="stingMountain"/>
+				<property name="scale" value="0.33"/>
+				<property name="bias" value="0.66"/>
+			</module><!--	These affect how edgy mountain is generated. scale+bias=1.0 Edit scale larger, more edgy mountain is generated. (scale, bias) = (0.5, 0.5) or (0.75, 0.25) is good example of edgy one.-->
+			<module name="stingMountainIntensed" type="Multiply">
+				<property name="sourceModule1" value="stingMountain"/>
+				<property name="sourceModule2" value="stingIntense"/>
+			</module>
+			<module name="stingMountainOut" type="ScaleOutput">
+				<property name="sourceModule" value="stingMountainIntensed"/>
+				<property name="scale" value="2"/>
+			</module><!--	This affects the height of mountains. If you wanna make them higher, edit into larger number, such as 2.5 or 3.0.-->
+
+
+
+<!--**********************************************************
+						Biome Modifiers
+											1 seed_additive
+		Mix up subgenerator into 1 modifier per 1 biome.
+	**********************************************************-->
+			<module name="areaCtrl" type="FastNoise" seed_additive="20">
+				<property name="frequency" value="0.7"/>
+			</module>
+			<module name="desertMod" type="Select">
+				<property name="controlModule" value="areaCtrl"/>
+				<property name="sourceModule1" value="landWavyOut"/>
+				<property name="sourceModule2" value="mesaOut"/>
+				<property name="bounds" value="0,100"/>
+				<property name="edgeFalloff" value="0.1"/>
+			</module>
+			<module name="forestMod" type="Select">
+				<property name="controlModule" value="areaCtrl"/>
+				<property name="sourceModule1" value="landRoughOut"/>
+				<property name="sourceModule2" value="stingMountainOut"/>
+				<property name="bounds" value="-0.8,0.8"/>
+				<property name="edgeFalloff" value="0.1"/>
+			</module>
+			<module name="snowMod" type="ScaleOutput">
+				<property name="sourceModule" value="stingMountainIntensed"/>
+				<property name="scale" value="2.5"/>
+			</module>
+			<module name="wastelandMod" type="Add">
+				<property name="sourceModule1" value="craterOut"/>
+				<property name="sourceModule2" value="stingMountainOut"/>
+			</module>
+
+
+<!--**********************************************************
+		Translate biome_generator into terrain_generator
+	**********************************************************-->
+			<module name="biomeVoronoi" type="Voronoi"><!--seed_additive="0"-->
+				<property name="frequency" value="0.0006"/>
+				<property name="displacement" value="0.5"/>
+			</module>
+			<module name="biomeBiasOutput" type="BiasOutput">
+				<property name="sourceModule" value="biomeVoronoi"/>
+				<property name="bias" value="0.5"/>
+			</module>
+			<module name="biomeDither" type="FastTurbulence">
+				<property name="sourceModule" value="biomeBiasOutput"/>
+				<property name="frequency" value="0.25"/>
+				<property name="power" value="8"/>
+				<property name="roughness" value="5"/>
+			</module>
+			<module name="biomeJiggle" type="FastTurbulence">
+				<property name="sourceModule" value="biomeDither"/>
+				<property name="frequency" value="0.0016"/>
+				<property name="power" value="400"/>
+				<property name="roughness" value="1"/>
+			</module>
+			<module name="biomeClampOutput" type="ClampOutput">
+				<property name="sourceModule" value="biomeJiggle"/>
+				<property name="bounds" value="0,1"/>
+			</module>
+			<module name="biomeCtrl" type="ScaleInput">
+				<property name="sourceModule" value="biomeClampOutput"/>
+				<property name="x" value="512"/>
+				<property name="z" value="512"/>
+			</module>
+
+<!--**********************************************************
+						World Modifiers
+		Mix up subgenerator into entire modifier.
+					desert			0,0.2
+					forest			0.2,0.7
+					snow			0.7,0.8
+					wasteland		0.8,1.0
+	**********************************************************-->
+			<module name="modBiomedBaseBase" type="Select">
+				<property name="controlModule" value="biomeCtrl"/>
+				<property name="sourceModule1" value="wastelandMod"/><!--most outer biome-->
+				<property name="sourceModule2" value="desertMod"/>
+				<property name="bounds" value="0,0.2"/>
+			</module>
+			<module name="modBiomedBase" type="Select">
+				<property name="controlModule" value="biomeCtrl"/>
+				<property name="sourceModule1" value="modBiomedBaseBase"/>
+				<property name="sourceModule2" value="forestMod"/>
+				<property name="bounds" value="0.2,0.8"/>
+			</module>
+			<module name="modBiomedOut" type="Select">
+				<property name="controlModule" value="biomeCtrl"/>
+				<property name="sourceModule1" value="modBiomedBase"/>
+				<property name="sourceModule2" value="snowMod"/>
+				<property name="bounds" value="0.7,0.8"/>
+			</module>
+			<!--<module name="testOut" type="Add">
+				<property name="sourceModule1" value="modBiomedOut"/>
+				<property name="sourceModule2" value="landSmoothOut"/>
+			</module>-->
+
+
+<!--**********************************************************
+					River + Riverside generator
+											2 seed_additive
+		Descend landSmooth elevation by 2 stage Select
+	**********************************************************-->
+			<module name="riverBase" type="Constant">
+				<property name="constant" value="-0.15"/>
+			</module>
+			<module name="riverSideBase" type="Constant">
+				<property name="constant" value="0.01"/>
+			</module>
+
+			<module name="riverCtrlBase" type="FastNoise" seed_additive="30">
+				<property name="frequency" value="0.2"/><!--	This affects the count of rivers. If you wanna make them more, edit into larger number, such as 0.29 or 0.32.-->
+				<property name="octaveCount" value="3"/>
+			</module>
+			<module name="riverCtrl" type="AbsoluteOutput">
+				<property name="sourceModule" value="riverCtrlBase"/>
+			</module>
+			<module name="riverSideCtrlBase" type="ScaleInput">
+				<property name="sourceModule" value="riverCtrl"/>
+				<property name="y" value="0"/>
+			</module>
+			<module name="riverSideCtrl" type="FastTurbulence" seed_additive="31">
+				<property name="sourceModule" value="riverSideCtrlBase"/>
+				<property name="frequency" value="50"/>
+				<property name="power" value="0.01"/>
+				<property name="roughness" value="2"/>
+			</module>
+
+			<module name="worldRiverSide" type="Select">
+				<property name="controlModule" value="riverSideCtrl"/>
+				<property name="sourceModule1" value="landSmoothOut"/>
+				<property name="sourceModule2" value="riverSideBase"/>
+				<property name="bounds" value="-100,0.094"/>
+				<property name="edgeFalloff" value="0.05"/>
+			</module>
+			<module name="worldRiver" type="Select">
+				<property name="controlModule" value="riverCtrl"/>
+				<property name="sourceModule1" value="worldRiverSide"/>
+				<property name="sourceModule2" value="riverBase"/>
+				<property name="bounds" value="-100,0"/><!--	This affects the width of rivers. If you wanna make them wider, edit into larger number, such as 0.04 or 0.08.-->
+				<property name="edgeFalloff" value="0.04"/><!--	This affects the smoothness of difference between land & river. Larger number will make them more smoothier change. -->
+			</module>
+
+<!--**********************************************************
+					River + Riverside generator
+		Shrink world modifier into 0 around the riverside.
+	**********************************************************-->
+			<!--<module name="constant" type="Constant"/>-->
+			<module name="modMinusRiver" type="Select">
+				<property name="controlModule" value="riverCtrl"/>
+				<property name="sourceModule1" value="modBiomedOut"/>
+				<property name="sourceModule2" value="constant"/>
+				<property name="bounds" value="-100,0.2"/>
+				<property name="edgeFalloff" value="0.2"/>
+			</module>
+
+			<module name="worldOut" type="Add">
+				<property name="sourceModule1" value="worldRiver"/>
+				<property name="sourceModule2" value="modMinusRiver"/>
+			</module>
+			<module name="scaleBiasOutput" type="ScaleBiasOutput">
+				<property name="sourceModule" value="worldOut"/>
+				<property name="scale" value="100"/>
+				<property name="bias" value="0"/>
+			</module>
+
+			<output module="scaleBiasOutput"/>
+		</terrain_generator>
 	</terrain_generators>
 
 	<biome_generators>
