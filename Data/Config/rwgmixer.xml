@@ -650,6 +650,10 @@
 			<biome_generator range="0,0.2"/>
 		</biome_spawn_rule>
 
+		<biome_spawn_rule name="water">
+			<terrain_generator range="-31,2"/>
+		</biome_spawn_rule>
+
 		<biome_spawn_rule name="wasteland">
 			<biome_generator range="0.9,1.0"/>
 		</biome_spawn_rule>
@@ -660,10 +664,6 @@
 
 		<biome_spawn_rule name="radiated">
 			<distance_from_center range="10000,20000"/>
-		</biome_spawn_rule>
-
-		<biome_spawn_rule name="water">
-			<terrain_generator range="-31,-1"/>
 		</biome_spawn_rule>
 
 	</biome_spawn_rules>
