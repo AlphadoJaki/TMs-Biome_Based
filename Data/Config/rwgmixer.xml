@@ -555,7 +555,7 @@
 	<biome_generators>
 		<biome_generator name="vanilla">
 			<module name="voronoi" type="Voronoi">
-				<property name="frequency" value="0.0008"/>
+				<property name="frequency" value="0.0006"/>
 				<property name="displacement" value="0.5"/>
 			</module>
 			<module name="biasOutput" type="BiasOutput">
