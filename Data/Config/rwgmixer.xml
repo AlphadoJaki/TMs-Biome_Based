@@ -686,7 +686,7 @@
 				<property name="scale" value="0.04"/>
 				<property name="bias" value="0.04"/>
 			</module>
-			<module name="mesaCtrlBaseBase" type="FastNoise" seed_additive="7">
+			<module name="mesaCtrl" type="FastNoise" seed_additive="7">
 				<property name="frequency" value="1.3"/>
 				<property name="octaveCount" value="10"/>
 			</module>
